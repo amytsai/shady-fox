@@ -103,16 +103,10 @@ Vec3::Vec3() {
 
 Vec3::Vec3(float a, float b, float c) {
   // constructs a vector, normalizes it if it is not normalized.
-  if (a > 1 || b > 1 || c > 1) {
     float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
     x = a/len;
     y = b/len;
     z = c/len;
-  } else {
-    x = a;
-    y = b;
-    z = c;
-  }
 }
 
 Vec3 Vec3::add(Vec3 v) {
@@ -120,12 +114,11 @@ Vec3 Vec3::add(Vec3 v) {
   float b = y + v.y;
   float c = z + v.z;
 
-  if (a > 1 || b > 1 || c > 1) {
-    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
-    a = a/len;
-    b = b/len;
-    c = c/len;
-  }
+  float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+  a = a/len;
+  b = b/len;
+  c = c/len;
+
   return Vec3(a,b,c);
 }
 
@@ -134,12 +127,11 @@ Vec3 Vec3::sub(Vec3 v) {
   float b = y - v.y;
   float c = z - v.z;
 
-  if (a > 1 || b > 1 || c > 1) {
-    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
-    a = a/len;
-    b = b/len;
-    c = c/len;
-  }
+  float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+  a = a/len;
+  b = b/len;
+  c = c/len;
+
   return Vec3(a,b,c);
 }
 
@@ -250,9 +242,9 @@ void circle(float centerX, float centerY, float radius) {
             Vec3 pl (curLight.x, curLight.y, curLight.z);
             Vec3 l = pl.sub(n);
             float dotp = l.dot(n);
-            r += max(0.0f, kd.red*dotp);
-            g += max(0.0f, kd.green*dotp);
-            b += max(0.0f, kd.blue*dotp);
+            r += max(0.0f, kd.red*dotp*curLight.rgb.red);
+            g += max(0.0f, kd.green*dotp*curLight.rgb.green);
+            b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
             float dotp = dl.dot(n);
@@ -262,9 +254,9 @@ void circle(float centerX, float centerY, float radius) {
           }
         }
 
-        r = min(r, 1.0f);
-        g = min(g, 1.0f);
-        b = min(b, 1.0f);
+        //r = min(r, 1.0f);
+        //g = min(g, 1.0f);
+        //b = min(b, 1.0f);
         setPixel(i,j,r,g,b);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
