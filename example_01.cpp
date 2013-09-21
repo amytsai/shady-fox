@@ -38,14 +38,31 @@ class Viewport {
     int w, h; // width and height
 };
 
+class Light;
+
+class Light {
+  public:
+    float x, y, z;
+    Rgb rgb;
+    bool isPL;
+}
+
+class Rgb;
+
+class Rgb {
+  public:
+    float red, green, blue;
+}
+
 
 //****************************************************
 // Global Variables
 //****************************************************
 Viewport	viewport;
-
-
-
+Rgb ka; // ambient color coefficient
+Rgb kd; // diffuse color coefficient
+Rgb ks; // specular color coefficient
+float sp; // specular power coefficient
 
 //****************************************************
 // Simple init function
@@ -127,7 +144,7 @@ void circle(float centerX, float centerY, float radius) {
         setPixel(i,j, 1.0, 0.0, 0.0);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
-        // setPixel(i,j, x/radius, y/radius, z/radius );
+        //setPixel(i,j, x/radius, y/radius, z/radius );
       }
 
 
@@ -161,6 +178,42 @@ void myDisplay() {
 // the usual stuff, nothing exciting here
 //****************************************************
 int main(int argc, char *argv[]) {
+  //Parsing command line arguments
+  std::cout << argc <<endl;
+  int i = 2;
+  while (i < argc + 1) {
+    if (argv[i] == "-ka") {
+      ka.red = argv[i+1];
+      ka.green = argv[i+2];
+      ka.blue = argv[i+3];
+      i+=4
+    }
+    else if (argv[i] == "-kd") {
+      kd.red = argv[i+1];
+      kd.green = argv[i+2];
+      kd.blue = argv[i+3];
+      i+=4
+    }
+    else if (argv[i] == "-ks") {
+      ks.red = argv[i+1];
+      ks.green = argv[i+2];
+      ks.blue = argv[i+3];
+      i+=4
+    }
+    else if (argv[i] == "-sp") {
+      sp = argv[i+1];
+      i+=2;
+    }
+    else if (argv[i] == "-pl") {
+    }
+    else if (argv[i] == "-dl") {
+    } else {
+      std::cout << "Not enough or invalid arguments please try again";
+      sleep(2000);
+      exit(0);
+    }
+
+  }
   //This initializes glut
   glutInit(&argc, argv);
 
@@ -177,9 +230,6 @@ int main(int argc, char *argv[]) {
   glutCreateWindow(argv[0]);
 
   initScene();							// quick function to set up scene
-
-  glutDisplayFunc(myDisplay);				// function to run when its time to draw something
-  glutReshapeFunc(myReshape);				// function to run when the window gets resized
 
   glutMainLoop();							// infinite loop that will keep drawing and resizing
   // and whatever else
