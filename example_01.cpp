@@ -90,9 +90,9 @@ class Vec3 {
     float x, y, z;
     Vec3();
     Vec3(float, float, float);
-    Vec3 add(Vec3);
-    Vec3 sub(Vec3);
+    Vec3 dirToLight(Light);
     float dot(Vec3);
+
 };
 
 Vec3::Vec3() {
@@ -109,23 +109,10 @@ Vec3::Vec3(float a, float b, float c) {
     z = c/len;
 }
 
-Vec3 Vec3::add(Vec3 v) {
-  float a = x + v.x;
-  float b = y + v.y;
-  float c = z + v.z;
-
-  float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
-  a = a/len;
-  b = b/len;
-  c = c/len;
-
-  return Vec3(a,b,c);
-}
-
-Vec3 Vec3::sub(Vec3 v) {
-  float a = x - v.x;
-  float b = y - v.y;
-  float c = z - v.z;
+Vec3 Vec3::dirToLight(Light l) {
+  float a = l.x -x;
+  float b = l.y -y;
+  float c = l.z -z;
 
   float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
   a = a/len;
@@ -239,8 +226,7 @@ void circle(float centerX, float centerY, float radius) {
           Light curLight = lights[i];
           Vec3 n (x, y, z); // normal to surface
           if (curLight.isPL) {
-            Vec3 pl (curLight.x, curLight.y, curLight.z);
-            Vec3 l = pl.sub(n);
+            Vec3 l = n.dirToLight(curLight);
             float dotp = l.dot(n);
             r += max(0.0f, kd.red*dotp*curLight.rgb.red);
             g += max(0.0f, kd.green*dotp*curLight.rgb.green);
@@ -248,9 +234,9 @@ void circle(float centerX, float centerY, float radius) {
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
             float dotp = dl.dot(n);
-            r += max(0.0f, kd.red*dotp);
-            g += max(0.0f, kd.green*dotp);
-            b += max(0.0f, kd.blue*dotp);
+            r += max(0.0f, kd.red * curLight.rgb.red * dotp);
+            g += max(0.0f, kd.green * curLight.rgb.green * dotp);
+            b += max(0.0f, kd.blue * curLight.rgb.blue * dotp);
           }
         }
 
