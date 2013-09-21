@@ -90,7 +90,6 @@ class Vec3 {
     float x, y, z;
     Vec3();
     Vec3(float, float, float);
-    void setValues(float, float, float);
     Vec3 add(Vec3);
     Vec3 sub(Vec3);
     float dot(Vec3);
@@ -105,7 +104,7 @@ Vec3::Vec3() {
 Vec3::Vec3(float a, float b, float c) {
   // constructs a vector, normalizes it if it is not normalized.
   if (a > 1 || b > 1 || c > 1) {
-    float len = sqrt(a^2 + b^2 + c^2);
+    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
     x = a/len;
     y = b/len;
     z = c/len;
@@ -114,6 +113,34 @@ Vec3::Vec3(float a, float b, float c) {
     y = b;
     z = c;
   }
+}
+
+Vec3 Vec3::add(Vec3 v) {
+  float a = x + v.x;
+  float b = y + v.y;
+  float c = z + v.z;
+
+  if (a > 1 || b > 1 || c > 1) {
+    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+    a = a/len;
+    b = b/len;
+    c = c/len;
+  }
+  return Vec3(a,b,c);
+}
+
+Vec3 Vec3::sub(Vec3 v) {
+  float a = x - v.x;
+  float b = y - v.y;
+  float c = z - v.z;
+
+  if (a > 1 || b > 1 || c > 1) {
+    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+    a = a/len;
+    b = b/len;
+    c = c/len;
+  }
+  return Vec3(a,b,c);
 }
 
 
@@ -211,7 +238,7 @@ void circle(float centerX, float centerY, float radius) {
         // Loop over all lights and calculate diffuse and specular terms
         for(int i = 0; i < numLights; i++) {
           Light curLight = lights[i];
-          float lx, ly, lz //vector for direction to light source
+          float lx, ly, lz ;//vector for direction to light source
           if (curLight.isPL) {
 
           } else {
