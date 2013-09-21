@@ -32,26 +32,56 @@ using namespace std;
 //****************************************************
 
 class Viewport;
+class Rgb;
+class Light;
 
 class Viewport {
   public:
     int w, h; // width and height
 };
 
-class Light;
+class Rgb {
+  public:
+    float red, green, blue;
+    Rgb();
+    Rgb(float, float, float);
+};
+
+Rgb::Rgb() {
+  red = 0.0f;
+  green = 0.0f;
+  blue = 0.0f;
+}
+
+Rgb::Rgb(float r, float g, float b) {
+    red = r;
+    green = g;
+    blue = b;
+}
 
 class Light {
   public:
     float x, y, z;
     Rgb rgb;
     bool isPL;
+    Light();
+    Light(float, float, float, Rgb, bool);
+};
+
+Light::Light() {
+  x = 0.0f;
+  y = 0.0f;
+  z = 0.0f;
+  rgb = Rgb ();
+  isPL = false;
 }
 
-class Rgb;
-
-class Rgb {
-  public:
-    float red, green, blue;
+Light::Light(float a, float b, float c, Rgb color, bool PL) {
+  x = a;
+  y = b;
+  z = c;
+  rgb = color;
+  isPL = PL;
 }
 
 
@@ -63,6 +93,8 @@ Rgb ka; // ambient color coefficient
 Rgb kd; // diffuse color coefficient
 Rgb ks; // specular color coefficient
 float sp; // specular power coefficient
+Light lights[10]; // array to hold up to 10 lights in the scene
+int numLights = 0; // number of lights in the scene
 
 //****************************************************
 // Simple init function
@@ -136,12 +168,17 @@ void circle(float centerX, float centerY, float radius) {
 
       float dist = sqrt(sqr(x) + sqr(y));
 
+      float r, g, b;
+
       if (dist<=radius) {
 
         // This is the front-facing Z coordinate
         float z = sqrt(radius*radius-dist*dist);
+        r = ka.red;
+        g = ka.green;
+        b = ka.blue;
 
-        setPixel(i,j, 1.0, 0.0, 0.0);
+        setPixel(i,j,r,g,b);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
         //setPixel(i,j, x/radius, y/radius, z/radius );
@@ -180,39 +217,55 @@ void myDisplay() {
 int main(int argc, char *argv[]) {
   //Parsing command line arguments
   std::cout << argc <<endl;
-  int i = 2;
-  while (i < argc + 1) {
-    if (argv[i] == "-ka") {
-      ka.red = argv[i+1];
-      ka.green = argv[i+2];
-      ka.blue = argv[i+3];
-      i+=4
+  //printf("asdf %s %s \n", "hello", "world");
+  int i = 1;
+  while (i < argc) {
+    printf("argv[%d] = %s\n", i, argv[i]);
+    if (strcmp(argv[i], "-ka") == 0) {
+      ka.red = atof(argv[i+1]);
+      ka.green = atof(argv[i+2]);
+      ka.blue = atof(argv[i+3]);
+      printf("ka: %f, %f, %f \n", ka.red, ka.green, ka.blue);
+      i+=4;
     }
-    else if (argv[i] == "-kd") {
-      kd.red = argv[i+1];
-      kd.green = argv[i+2];
-      kd.blue = argv[i+3];
-      i+=4
+    else if (strcmp(argv[i], "-kd") == 0) {
+      kd.red = atof(argv[i+1]);
+      kd.green = atof(argv[i+2]);
+      kd.blue = atof(argv[i+3]);
+      printf("kd: %f, %f, %f \n", kd.red, kd.green, kd.blue);
+      i+=4;
     }
-    else if (argv[i] == "-ks") {
-      ks.red = argv[i+1];
-      ks.green = argv[i+2];
-      ks.blue = argv[i+3];
-      i+=4
+    else if (strcmp(argv[i], "-ks") == 0) {
+      ks.red = atof(argv[i+1]);
+      ks.green = atof(argv[i+2]);
+      ks.blue = atof(argv[i+3]);
+      printf("ks: %f, %f, %f \n", ks.red, ks.green, ks.blue);
+      i+=4;
     }
-    else if (argv[i] == "-sp") {
-      sp = argv[i+1];
+    else if (strcmp(argv[i], "-sp") == 0) {
+      sp = atof(argv[i+1]);
+      printf("sp: %f \n", sp);
       i+=2;
     }
-    else if (argv[i] == "-pl") {
+    else if (strcmp(argv[i], "-pl") == 0) {
+      Light temp (atof(argv[i+1]), atof(argv[i+2]), atof(argv[i+3]), Rgb(atof(argv[i+4]), atof(argv[i+5]), atof(argv[i+6])), true);
+      lights[numLights] = temp;
+      printf("added point light \n");
+      numLights++;
+      i+=7;
     }
-    else if (argv[i] == "-dl") {
+    else if (strcmp(argv[i], "-dl") == 0) {
+      Light temp (atof(argv[i+1]), atof(argv[i+2]), atof(argv[i+3]), Rgb(atof(argv[i+4]), atof(argv[i+5]), atof(argv[i+6])), false);
+      lights[numLights] = temp;
+      printf("added directional light \n");
+      numLights++;
+      i+=7;
+
     } else {
-      std::cout << "Not enough or invalid arguments please try again";
+      std::cout << "Not enough or invalid arguments please try again\n";
       sleep(2000);
       exit(0);
     }
-
   }
   //This initializes glut
   glutInit(&argc, argv);
@@ -230,6 +283,9 @@ int main(int argc, char *argv[]) {
   glutCreateWindow(argv[0]);
 
   initScene();							// quick function to set up scene
+
+  glutDisplayFunc(myDisplay);        // function to run when its time to draw something
+  glutReshapeFunc(myReshape);        // function to run when the window gets resized
 
   glutMainLoop();							// infinite loop that will keep drawing and resizing
   // and whatever else
