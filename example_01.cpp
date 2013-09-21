@@ -143,6 +143,10 @@ Vec3 Vec3::sub(Vec3 v) {
   return Vec3(a,b,c);
 }
 
+float Vec3::dot(Vec3 v) {
+  return x*v.x + y+v.y + z*v.z;
+}
+
 
 //****************************************************
 // Global Variables
@@ -235,22 +239,32 @@ void circle(float centerX, float centerY, float radius) {
         g = ka.green;
         b = ka.blue;
 
-        // Loop over all lights and calculate diffuse and specular terms
-        for(int i = 0; i < numLights; i++) {
-          Light curLight = lights[i];
-          float lx, ly, lz ;//vector for direction to light source
-          if (curLight.isPL) {
-
-          } else {
-
-          }
-
-        }
-
         // This is the front-facing Z coordinate
         float z = sqrt(radius*radius-dist*dist);
 
+        // Loop over all lights and calculate diffuse and specular terms
+        for(int i = 0; i < numLights; i++) {
+          Light curLight = lights[i];
+          Vec3 n (x, y, z); // normal to surface
+          if (curLight.isPL) {
+            Vec3 pl (curLight.x, curLight.y, curLight.z);
+            Vec3 l = pl.sub(n);
+            float dotp = l.dot(n);
+            r += max(0.0f, kd.red*dotp);
+            g += max(0.0f, kd.green*dotp);
+            b += max(0.0f, kd.blue*dotp);
+          } else {
+            Vec3 dl (curLight.x, curLight.y, curLight.z);
+            float dotp = dl.dot(n);
+            r += max(0.0f, kd.red*dotp);
+            g += max(0.0f, kd.green*dotp);
+            b += max(0.0f, kd.blue*dotp);
+          }
+        }
 
+        r = min(r, 1.0f);
+        g = min(g, 1.0f);
+        b = min(b, 1.0f);
         setPixel(i,j,r,g,b);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
