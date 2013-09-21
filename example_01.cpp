@@ -34,6 +34,7 @@ using namespace std;
 class Viewport;
 class Rgb;
 class Light;
+class Vec3;
 
 class Viewport {
   public:
@@ -82,6 +83,37 @@ Light::Light(float a, float b, float c, Rgb color, bool PL) {
   z = c;
   rgb = color;
   isPL = PL;
+}
+
+class Vec3 {
+  public: 
+    float x, y, z;
+    Vec3();
+    Vec3(float, float, float);
+    void setValues(float, float, float);
+    Vec3 add(Vec3);
+    Vec3 sub(Vec3);
+    float dot(Vec3);
+};
+
+Vec3::Vec3() {
+  x = 0.0f;
+  y = 0.0f;
+  z = 0.0f;
+}
+
+Vec3::Vec3(float a, float b, float c) {
+  // constructs a vector, normalizes it if it is not normalized.
+  if (a > 1 || b > 1 || c > 1) {
+    float len = sqrt(a^2 + b^2 + c^2);
+    x = a/len;
+    y = b/len;
+    z = c/len;
+  } else {
+    x = a;
+    y = b;
+    z = c;
+  }
 }
 
 
@@ -171,12 +203,26 @@ void circle(float centerX, float centerY, float radius) {
       float r, g, b;
 
       if (dist<=radius) {
-
-        // This is the front-facing Z coordinate
-        float z = sqrt(radius*radius-dist*dist);
+        // Ambient term
         r = ka.red;
         g = ka.green;
         b = ka.blue;
+
+        // Loop over all lights and calculate diffuse and specular terms
+        for(int i = 0; i < numLights; i++) {
+          Light curLight = lights[i];
+          float lx, ly, lz //vector for direction to light source
+          if (curLight.isPL) {
+
+          } else {
+
+          }
+
+        }
+
+        // This is the front-facing Z coordinate
+        float z = sqrt(radius*radius-dist*dist);
+
 
         setPixel(i,j,r,g,b);
 
