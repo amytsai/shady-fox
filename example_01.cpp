@@ -103,16 +103,16 @@ Vec3::Vec3() {
 
 Vec3::Vec3(float a, float b, float c) {
   // constructs a vector, normalizes it if it is not normalized.
-    float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+    float len = sqrt(a*a + b*b + c*c);
     x = a/len;
     y = b/len;
     z = c/len;
 }
 
 Vec3 Vec3::dirToLight(Light l) {
-  float a = l.x -x;
-  float b = l.y -y;
-  float c = l.z -z;
+  float a = l.x - x;
+  float b = l.y - y;
+  float c = l.z - z;
 
   float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
   a = a/len;
@@ -123,7 +123,7 @@ Vec3 Vec3::dirToLight(Light l) {
 }
 
 float Vec3::dot(Vec3 v) {
-  return x*v.x + y+v.y + z*v.z;
+  return x*v.x + y*v.y + z*v.z;
 }
 
 
@@ -225,16 +225,18 @@ void circle(float centerX, float centerY, float radius) {
         for(int i = 0; i < numLights; i++) {
           Light curLight = lights[i];
           Vec3 n (x, y, z); // normal to surface
-		  Vec3 eye (0, 0, 1); //viewer
+		      Vec3 eye (0.0f, 0.0f, 1.0f); //viewer
           if (curLight.isPL) {
-			//diffuse shading
+
+			      //diffuse shading
             Vec3 l = n.dirToLight(curLight);
             float dotp = l.dot(n);
             r += max(0.0f, kd.red*dotp*curLight.rgb.red);
             g += max(0.0f, kd.green*dotp*curLight.rgb.green);
             b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
+
       			//specular shading
-      			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
+      			Vec3 refLight (-l.x + 2 * dotp * x, -l.y + 2 * dotp * y, -l.z + 2 * dotp * z); //reflected light
       			float dotps =  eye.dot(refLight);
       			r += ks.red*pow(max(0.0f, dotps), sp);
       			g += ks.green*pow(max(0.0f, dotps), sp);
@@ -242,16 +244,17 @@ void circle(float centerX, float centerY, float radius) {
 
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
-			float dotp = dl.dot(n);
+			      float dotp = dl.dot(n);
             r += max(0.0f, kd.red * curLight.rgb.red * dotp);
             g += max(0.0f, kd.green * curLight.rgb.green * dotp);
             b += max(0.0f, kd.blue * curLight.rgb.blue * dotp);
-			//specular shading
-			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
-			float dotps =  eye.dot(refLight);
-			r += ks.red*pow(max(0.0f, dotps), sp);
-			g += ks.green*pow(max(0.0f, dotps), sp);
-			b += ks.blue*pow(max(0.0f, dotps), sp);
+
+			       //specular shading
+      			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
+      			float dotps =  eye.dot(refLight);
+      			r += ks.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*pow(max(0.0f, dotps), sp);
           }
         }
 
@@ -298,6 +301,13 @@ int main(int argc, char *argv[]) {
   //Parsing command line arguments
   std::cout << argc <<endl;
   //printf("asdf %s %s \n", "hello", "world");
+  Vec3 test1(0.1f, 0.0f, 0.0f);
+  printf("test1 (%f, %f, %f) \n", test1.x, test1.y, test1.z);
+
+  Vec3 test2(0.0f, 0.0f, 0.1f);
+  printf("test2 (%f, %f, %f) \n", test1.x, test1.y, test1.z);
+
+  printf("test1 dot test2: %f\n", test1.dot(test2));
   int i = 1;
   while (i < argc) {
     printf("argv[%d] = %s\n", i, argv[i]);
