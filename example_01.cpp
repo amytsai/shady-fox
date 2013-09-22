@@ -228,9 +228,9 @@ void circle(float centerX, float centerY, float radius) {
           if (curLight.isPL) {
             Vec3 l = n.dirToLight(curLight);
             float dotp = l.dot(n);
-            r += max(0.0f, kd.red*dotp*curLight.rgb.red);
-            g += max(0.0f, kd.green*dotp*curLight.rgb.green);
-            b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
+            r += max(0.0f, kd.red * dotp * curLight.rgb.red);
+            g += max(0.0f, kd.green * dotp * curLight.rgb.green);
+            b += max(0.0f, kd.blue * dotp * curLight.rgb.blue);
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
             float dotp = dl.dot(n);
@@ -240,9 +240,9 @@ void circle(float centerX, float centerY, float radius) {
           }
         }
 
-        //r = min(r, 1.0f);
-        //g = min(g, 1.0f);
-        //b = min(b, 1.0f);
+        r = min(r, 1.0f);
+        g = min(g, 1.0f);
+        b = min(b, 1.0f);
         setPixel(i,j,r,g,b);
 
         // This is amusing, but it assumes negative color values are treated reasonably.
