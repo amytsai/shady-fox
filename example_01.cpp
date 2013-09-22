@@ -225,18 +225,32 @@ void circle(float centerX, float centerY, float radius) {
         for(int i = 0; i < numLights; i++) {
           Light curLight = lights[i];
           Vec3 n (x, y, z); // normal to surface
+		  Vec3 eye (0, 0, 1); //viewer
           if (curLight.isPL) {
+			//diffuse shading
             Vec3 l = n.dirToLight(curLight);
             float dotp = l.dot(n);
             r += max(0.0f, kd.red*dotp*curLight.rgb.red);
             g += max(0.0f, kd.green*dotp*curLight.rgb.green);
             b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
+			//specular shading
+			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
+			float dotps =  eye.dot(refLight);
+			r += ks.red*pow(max(0.0f, dotps), sp);
+			g += ks.green*pow(max(0.0f, dotps), sp);
+			b += ks.blue*pow(max(0.0f, dotps), sp);
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
-            float dotp = dl.dot(n);
+			float dotp = dl.dot(n);
             r += max(0.0f, kd.red * curLight.rgb.red * dotp);
             g += max(0.0f, kd.green * curLight.rgb.green * dotp);
             b += max(0.0f, kd.blue * curLight.rgb.blue * dotp);
+			//specular shading
+			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
+			float dotps =  eye.dot(refLight);
+			r += ks.red*pow(max(0.0f, dotps), sp);
+			g += ks.green*pow(max(0.0f, dotps), sp);
+			b += ks.blue*pow(max(0.0f, dotps), sp);
           }
         }
 
@@ -328,7 +342,7 @@ int main(int argc, char *argv[]) {
 
     } else {
       std::cout << "Not enough or invalid arguments please try again\n";
-      sleep(2000);
+      //sleep(2000);
       exit(0);
     }
   }
