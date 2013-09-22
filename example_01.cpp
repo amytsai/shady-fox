@@ -92,6 +92,8 @@ class Vec3 {
     Vec3(float, float, float);
     Vec3 dirToLight(Light);
     float dot(Vec3);
+    Vec3 times(float);
+    Vec3 sub(Vec3);
 
 };
 
@@ -124,6 +126,25 @@ Vec3 Vec3::dirToLight(Light l) {
 
 float Vec3::dot(Vec3 v) {
   return x*v.x + y*v.y + z*v.z;
+}
+
+Vec3 Vec3::times(float k) {
+  float a = k*x;
+  float b = k*y;
+  float c = k*z;
+  return Vec3(a,b,c);
+}
+
+Vec3 Vec3::sub(Vec3 v) {
+  float a = x - v.x;
+  float b = y - v.y;
+  float c = z = v.z;
+
+  float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
+  a = a/len;
+  b = b/len;
+  c = c/len;
+  return Vec3(a,b,c);
 }
 
 
@@ -236,11 +257,12 @@ void circle(float centerX, float centerY, float radius) {
             b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
 
       			//specular shading
-      			Vec3 refLight (-l.x + 2 * dotp * x, -l.y + 2 * dotp * y, -l.z + 2 * dotp * z); //reflected light
-      			float dotps =  eye.dot(refLight);
-      			r += ks.red*pow(max(0.0f, dotps), sp);
-      			g += ks.green*pow(max(0.0f, dotps), sp);
-      			b += ks.blue*pow(max(0.0f, dotps), sp);
+            float dotp2 = dotp*2;
+            Vec3 ref(n.x*dotp2 - l.x, n.y*dotp2 - l.y, n.z*dotp2 - l.z);
+      			float dotps =  eye.dot(ref);
+      			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.green*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
 
           } else {
             Vec3 dl (curLight.x, curLight.y, curLight.z);
@@ -249,12 +271,13 @@ void circle(float centerX, float centerY, float radius) {
             g += max(0.0f, kd.green * curLight.rgb.green * dotp);
             b += max(0.0f, kd.blue * curLight.rgb.blue * dotp);
 
-			       //specular shading
-      			Vec3 refLight (-1 * curLight.x + 2 * dotp * x, -1 * curLight.y + 2 * dotp * y, -1 * curLight.z + 2 * dotp * z); //reflected light
-      			float dotps =  eye.dot(refLight);
-      			r += ks.red*pow(max(0.0f, dotps), sp);
-      			g += ks.green*pow(max(0.0f, dotps), sp);
-      			b += ks.blue*pow(max(0.0f, dotps), sp);
+			      //specular shading
+            float dotp2 = dotp*2;
+            Vec3 ref(n.x*dotp2 - dl.x, n.y*dotp2 - dl.y, n.z*dotp2 - dl.z);
+      			float dotps =  eye.dot(ref);
+      			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.red*pow(max(0.0f, dotps), sp);
           }
         }
 
