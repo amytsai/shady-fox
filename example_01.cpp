@@ -161,6 +161,7 @@ int numLights = 0; // number of lights in the scene
 float innerRad; // inner radius of a torus
 float outerRad; // outer radius of a torus
 bool isTor = false; // whether we draw a torus or not
+bool isToon = false; // whether or not to use toon shading
 
 //****************************************************
 // Simple init function
@@ -186,6 +187,36 @@ void myReshape(int w, int h) {
 
 }
 
+//****************************************************
+// Calculates a "toon" color by narrowing the allowable color range
+//****************************************************
+float toonify(float color) {
+  if (color < 0.25f) {
+    return 0.2f;
+  } else if (color < 0.5) {
+    return 0.4f;
+  } else if (color < 0.75) {
+    return 0.6f;
+  } else if (color < 0.95f) {
+    return 0.8f;
+  } else {
+    return 1.0f;
+  }
+}
+
+float toonify2(float color) {
+  if (color < 0.125f) {
+    return 0.0f;
+  } else if (color < 0.375f) {
+    return 0.25f;
+  } else if (color < 0.625f) {
+    return 0.5f;
+  } else if (color < 0.875f) {
+    return 0.75f;
+  } else {
+    return 1.0f;
+  }
+}
 
 //****************************************************
 // A routine to set a pixel by drawing a GL point.  This is not a
@@ -194,12 +225,17 @@ void myReshape(int w, int h) {
 //****************************************************
 
 void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
-  glColor3f(r, g, b);
+  if (isToon) {
+    glColor3f(toonify(r), toonify(g), toonify(b));
+  } else {
+    glColor3f(r, g, b);
+  } 
   glVertex2f(x + 0.5, y + 0.5);   // The 0.5 is to target pixel
   // centers 
   // Note: Need to check for gap
   // bug on inst machines.
 }
+
 
 //****************************************************
 // Draw a filled circle.  
@@ -291,6 +327,14 @@ void circle(float centerX, float centerY, float radius) {
 
         // This is amusing, but it assumes negative color values are treated reasonably.
         //setPixel(i,j, x/radius, y/radius, z/radius );
+      } 
+      if(isToon) {
+        if (dist > radius && dist < radius + 3) {
+          setPixel(i,j,0.0f,0.0f,0.0f);
+        } else if (dist > radius) {
+          setPixel(i,j,1.0f,1.0f,1.0f);
+        }
+        
       }
 
 
@@ -394,6 +438,8 @@ void torus(float centerX, float centerY, float innerRadius, float outerRadius) {
 
         // This is amusing, but it assumes negative color values are treated reasonably.
         //setPixel(i,j, x/radius, y/radius, z/radius );
+      } else if(isToon) {
+        setPixel(i,j,1.0f,1.0f,1.0f);
       }
 
 
@@ -491,6 +537,10 @@ int main(int argc, char *argv[]) {
 		printf("tor: %f, %f \n", innerRad, outerRad);
 		i+=3;
     } 
+  else if (strcmp(argv[i], "-toon") == 0) {
+    isToon = true;
+    i+=1;
+  }
 	else {
       std::cout << "Not enough or invalid arguments please try again\n";
       //sleep(2000);
