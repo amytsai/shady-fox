@@ -158,6 +158,9 @@ Rgb ks; // specular color coefficient
 float sp; // specular power coefficient
 Light lights[10]; // array to hold up to 10 lights in the scene
 int numLights = 0; // number of lights in the scene
+float innerRad; // inner radius of a torus
+float outerRad; // outer radius of a torus
+boolean isTor = false; // whether we draw a torus or not
 
 //****************************************************
 // Simple init function
@@ -297,6 +300,109 @@ void circle(float centerX, float centerY, float radius) {
 
   glEnd();
 }
+
+//****************************************************
+// Draw a filled torus.  
+//****************************************************
+
+
+void torus(float centerX, float centerY, float innerRadius, float outerRadius) {
+  // Draw inner circle
+  glBegin(GL_POINTS);
+
+  // We could eliminate wasted work by only looping over the pixels
+  // inside the sphere's radius.  But the example is more clear this
+  // way.  In general drawing an object by loopig over the whole
+  // screen is wasteful.
+
+  int i,j;  // Pixel indices
+
+  //int minI = max(0,(int)floor(centerX-radius));
+  //int maxI = min(viewport.w-1,(int)ceil(centerX+radius));
+
+  //int minJ = max(0,(int)floor(centerY-radius));
+  //int maxJ = min(viewport.h-1,(int)ceil(centerY+radius));
+
+  outerRadius = min(viewport.w, viewport.h) / 3.0;
+  innerRadius = min(viewport.w, viewport.h) / 6.0;
+
+
+  for (i=0;i<viewport.w;i++) {
+    for (j=0;j<viewport.h;j++) {
+
+      // Location of the center of pixel relative to center of sphere
+      float x = (i+0.5-centerX);
+      float y = (j+0.5-centerY);
+
+      float dist = sqrt(sqr(x) + sqr(y));
+	  float torusCenter = (innerRadius + outerRadius)/2;
+
+      float r, g, b;
+
+      if (dist<=outerRadius && dist >= innerRadius) {
+        // Ambient term
+        r = ka.red;
+        g = ka.green;
+        b = ka.blue;
+
+        // This is the front-facing Z coordinate
+        float z = sqrt((outerRadius - dist)*(dist - innerRadius));
+
+        // Loop over all lights and calculate diffuse and specular terms
+        for(int i = 0; i < numLights; i++) {
+          Light curLight = lights[i];
+          Vec3 n (x - (torusCenter)/dist * x, y - (torusCenter)/dist * y, z); // normal to surface
+		      Vec3 eye (0.0f, 0.0f, 1.0f); //viewer
+          if (curLight.isPL) {
+
+			      //diffuse shading
+            Vec3 l = n.dirToLight(curLight);
+            float dotp = l.dot(n);
+            r += max(0.0f, kd.red*dotp*curLight.rgb.red);
+            g += max(0.0f, kd.green*dotp*curLight.rgb.green);
+            b += max(0.0f, kd.blue*dotp*curLight.rgb.blue);
+
+      			//specular shading
+            float dotp2 = dotp*2;
+            Vec3 ref(n.x*dotp2 - l.x, n.y*dotp2 - l.y, n.z*dotp2 - l.z);
+      			float dotps =  eye.dot(ref);
+      			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.green*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
+
+          } else {
+            Vec3 dl (curLight.x, curLight.y, curLight.z);
+			      float dotp = dl.dot(n);
+            r += max(0.0f, kd.red * curLight.rgb.red * dotp);
+            g += max(0.0f, kd.green * curLight.rgb.green * dotp);
+            b += max(0.0f, kd.blue * curLight.rgb.blue * dotp);
+
+			      //specular shading
+            float dotp2 = dotp*2;
+            Vec3 ref(n.x*dotp2 - dl.x, n.y*dotp2 - dl.y, n.z*dotp2 - dl.z);
+      			float dotps =  eye.dot(ref);
+      			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+          }
+        }
+
+        r = min(r, 1.0f);
+        g = min(g, 1.0f);
+        b = min(b, 1.0f);
+        setPixel(i,j,r,g,b);
+
+        // This is amusing, but it assumes negative color values are treated reasonably.
+        //setPixel(i,j, x/radius, y/radius, z/radius );
+      }
+
+
+    }
+  }
+
+
+  glEnd();
+}
 //****************************************************
 // function that does the actual drawing of stuff
 //***************************************************
@@ -309,8 +415,12 @@ void myDisplay() {
 
 
   // Start drawing
-  circle(viewport.w / 2.0 , viewport.h / 2.0 , min(viewport.w, viewport.h) / 3.0);
-
+  if(isTor) {
+	  torus(viewport.w / 2.0 , viewport.h / 2.0 , innerRad, outerRad);
+  }
+  else {
+		circle(viewport.w / 2.0 , viewport.h / 2.0 , min(viewport.w, viewport.h) / 3.0);
+  }
   glFlush();
   glutSwapBuffers();					// swap buffers (we earlier set double buffer)
 }
@@ -373,8 +483,15 @@ int main(int argc, char *argv[]) {
       printf("added directional light \n");
       numLights++;
       i+=7;
-
-    } else {
+    } 
+	else if (strcmp(argv[i], "-tor") == 0) {
+		innerRad = atof(argv[i+1]);
+		outerRad = atof(argv[i+2]);
+		isTor = true;
+		printf("tor: %f, %f \n", innerRad, outerRad);
+		i+=3;
+    } 
+	else {
       std::cout << "Not enough or invalid arguments please try again\n";
       //sleep(2000);
       exit(0);
