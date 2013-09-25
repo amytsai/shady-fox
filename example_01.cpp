@@ -160,7 +160,7 @@ Light lights[10]; // array to hold up to 10 lights in the scene
 int numLights = 0; // number of lights in the scene
 float innerRad; // inner radius of a torus
 float outerRad; // outer radius of a torus
-boolean isTor = false; // whether we draw a torus or not
+bool isTor = false; // whether we draw a torus or not
 
 //****************************************************
 // Simple init function
@@ -268,7 +268,7 @@ void circle(float centerX, float centerY, float radius) {
       			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
 
           } else {
-            Vec3 dl (curLight.x, curLight.y, curLight.z);
+            Vec3 dl (-curLight.x, -curLight.y, -curLight.z);
 			      float dotp = dl.dot(n);
             r += max(0.0f, kd.red * curLight.rgb.red * dotp);
             g += max(0.0f, kd.green * curLight.rgb.green * dotp);
