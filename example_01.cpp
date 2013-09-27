@@ -425,7 +425,7 @@ void torus(float centerX, float centerY, float innerRadius, float outerRadius) {
       			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
 
           } else {
-            Vec3 dl (curLight.x, curLight.y, curLight.z);
+            Vec3 dl (-curLight.x, -curLight.y, -curLight.z);
 			      float dotp = dl.dot(n);
             r += max(0.0f, kd.red * curLight.rgb.red * dotp);
             g += max(0.0f, kd.green * curLight.rgb.green * dotp);
