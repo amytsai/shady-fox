@@ -192,13 +192,9 @@ void myReshape(int w, int h) {
 //****************************************************
 float toonify(float color) {
   if (color < 0.25f) {
-    return 0.2f;
+    return 0.1f;
   } else if (color < 0.5) {
-    return 0.4f;
-  } else if (color < 0.75) {
-    return 0.6f;
-  } else if (color < 0.95f) {
-    return 0.8f;
+    return 0.5f;
   } else {
     return 1.0f;
   }
@@ -213,6 +209,20 @@ float toonify2(float color) {
     return 0.5f;
   } else if (color < 0.875f) {
     return 0.75f;
+  } else {
+    return 1.0f;
+  }
+}
+
+float toonify3(float color) {
+  if (color < 0.25f) {
+    return 0.2f;
+  } else if (color < 0.5) {
+    return 0.4f;
+  } else if (color < 0.75) {
+    return 0.6f;
+  } else if (color < 0.95f) {
+    return 0.8f;
   } else {
     return 1.0f;
   }
@@ -315,8 +325,8 @@ void circle(float centerX, float centerY, float radius) {
             Vec3 ref(n.x*dotp2 - dl.x, n.y*dotp2 - dl.y, n.z*dotp2 - dl.z);
       			float dotps =  eye.dot(ref);
       			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
-      			g += ks.green*curLight.rgb.red*pow(max(0.0f, dotps), sp);
-      			b += ks.blue*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.green*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
           }
         }
 
@@ -426,8 +436,8 @@ void torus(float centerX, float centerY, float innerRadius, float outerRadius) {
             Vec3 ref(n.x*dotp2 - dl.x, n.y*dotp2 - dl.y, n.z*dotp2 - dl.z);
       			float dotps =  eye.dot(ref);
       			r += ks.red*curLight.rgb.red*pow(max(0.0f, dotps), sp);
-      			g += ks.green*curLight.rgb.red*pow(max(0.0f, dotps), sp);
-      			b += ks.blue*curLight.rgb.red*pow(max(0.0f, dotps), sp);
+      			g += ks.green*curLight.rgb.green*pow(max(0.0f, dotps), sp);
+      			b += ks.blue*curLight.rgb.blue*pow(max(0.0f, dotps), sp);
           }
         }
 
@@ -439,7 +449,14 @@ void torus(float centerX, float centerY, float innerRadius, float outerRadius) {
         // This is amusing, but it assumes negative color values are treated reasonably.
         //setPixel(i,j, x/radius, y/radius, z/radius );
       } else if(isToon) {
-        setPixel(i,j,1.0f,1.0f,1.0f);
+        if (dist > outerRadius && dist <= outerRadius+2) {
+          setPixel(i,j, 0.0f, 0.0f, 0.0f);
+        } else if (dist < innerRadius && dist >= innerRadius-2){
+          setPixel(i,j, 0.0f, 0.0f, 0.0f);
+        } else {
+          setPixel(i,j,1.0f,1.0f,1.0f);          
+        }
+
       }
 
 
