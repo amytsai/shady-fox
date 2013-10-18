@@ -138,7 +138,7 @@ Vec3 Vec3::times(float k) {
 Vec3 Vec3::sub(Vec3 v) {
   float a = x - v.x;
   float b = y - v.y;
-  float c = z = v.z;
+  float c = z - v.z;
 
   float len = sqrt(pow(a,2) + pow(b,2) + pow(c,2));
   a = a/len;
